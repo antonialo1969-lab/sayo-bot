@@ -1,21 +1,36 @@
-const http = require('http');
-http.createServer((req, res) => {
-  res.write('Sayo esta online!');
-  res.end();
-}).listen(10000);
-
 const { Client, GatewayIntentBits } = require('discord.js');
-const cliente = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-cliente.on('ready', () => {
-  console.log(`Lista como ${cliente.user.tag}`);
+client.on('ready', () => {
+  console.log(`Sayo está online ✨ como ${client.user.tag}`);
 });
 
-cliente.on('messageCreate', async (mensaje) => {
-  if (mensaje.author.bot) return;
-  if (mensaje.content.toLowerCase().includes('sayo')) {
-    mensaje.reply('Holaa, soy Sayo 💖');
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+  
+  await interaction.deferReply();
+
+  const comando = interaction.commandName;
+  const texto = interaction.options.getString('texto') || 'hola';
+
+  let respuesta = '';
+
+  if (comando === 'say') {
+    respuesta = `¡Hola! ${texto} 🤗💖`;
+  } else if (comando === 'hola') {
+    respuesta = `¡Hola! Estoy dibujando mi dibujo de mi gato imaginario, ¡se llama Pompón y le gusta saltar sobre la luna! ✨👀`;
+  } else {
+    respuesta = `¡Qué bien que volviste! ¡Te extrañé mucho, jiji! ¡Vamos a jugar y hacer travesuras juntas! ✨👀`;
+  }
+
+  await interaction.editReply(respuesta);
+});
+
+client.on('messageCreate', msg => {
+  if (msg.author.bot) return;
+  if (msg.mentions.has(client.user)) {
+    msg.reply(`¡Qué bien que volviste! ¡Te extrañé mucho, jiji! ¡Vamos a jugar y hacer travesuras juntas! ✨`);
   }
 });
 
-cliente.login(process.env.TOKEN);
+client.login(process.env.TOKEN);
