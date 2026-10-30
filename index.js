@@ -18,7 +18,7 @@ client.on('interactionCreate', async interaction => {
 
   await interaction.deferReply({ ephemeral: true });
 
-  const { default: SayoHandler } = await import('./sayo/sayo.js');
+  const { default: SayoHandler } = await import('./sayo.js');
   const handler = new SayoHandler();
   const reply = await handler.handle(interaction);
   
