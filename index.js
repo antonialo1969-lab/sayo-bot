@@ -1,4 +1,11 @@
+// FIX PARA RENDER - NO BORRAR
+const express = require('express');
+const app = express();
+app.get('/', (req, res) => res.send('Sayo divertida viva!'));
+app.listen(process.env.PORT || 10000, () => console.log('Web OK'));
+// FIN FIX
 const { Client, GatewayIntentBits } = require('discord.js');
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 client.on('ready', () => {
