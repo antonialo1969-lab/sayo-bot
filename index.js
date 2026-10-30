@@ -1,7 +1,7 @@
 // FIX PARA RENDER - NO BORRAR
 const express = require('express');
 const app = express();
-app.get('/', (req, res) => res.send('Sayo bot vivo'));
+app.get('/', (req, res) => res.send( 'ok' ));
 app.listen(process.env.PORT || 10000);
 
 // CORRECCIÓN FINAL
@@ -25,4 +25,4 @@ client.on('interactionCreate', async interaction => {
   await interaction.editReply(reply);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.TOKEN || process.env.DISCORD_TOKEN || process.env.DISC_TOKEN);
