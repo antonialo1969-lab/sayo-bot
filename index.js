@@ -1,43 +1,28 @@
 // FIX PARA RENDER - NO BORRAR
 const express = require('express');
 const app = express();
-app.get('/', (req, res) => res.send('Sayo divertida viva!'));
-app.listen(process.env.PORT || 10000, () => console.log('Web OK'));
-// FIN FIX
+app.get('/', (req, res) => res.send('Sayo bot vivo'));
+app.listen(process.env.PORT || 10000);
+
+// CORRECCIÓN FINAL
 const { Client, GatewayIntentBits } = require('discord.js');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.on('ready', () => {
-  console.log(`Sayo está online ✨ como ${client.user.tag}`);
+  console.log(`Sayo está online ✨ ${client.user.tag}`);
 });
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+
+  await interaction.deferReply({ ephemeral: true });
+
+  const { default: SayoHandler } = await import('./sayo/sayo.js');
+  const handler = new SayoHandler();
+  const reply = await handler.handle(interaction);
   
-  await interaction.deferReply();
-
-  const comando = interaction.commandName;
-  const texto = interaction.options.getString('texto') || 'hola';
-
-  let respuesta = '';
-
-  if (comando === 'say') {
-    respuesta = `¡Hola! ${texto} 🤗💖`;
-  } else if (comando === 'hola') {
-    respuesta = `¡Hola! Estoy dibujando mi dibujo de mi gato imaginario, ¡se llama Pompón y le gusta saltar sobre la luna! ✨👀`;
-  } else {
-    respuesta = `¡Qué bien que volviste! ¡Te extrañé mucho, jiji! ¡Vamos a jugar y hacer travesuras juntas! ✨👀`;
-  }
-
-  await interaction.editReply(respuesta);
+  await interaction.editReply(reply);
 });
 
-client.on('messageCreate', msg => {
-  if (msg.author.bot) return;
-  if (msg.mentions.has(client.user)) {
-    msg.reply(`¡Qué bien que volviste! ¡Te extrañé mucho, jiji! ¡Vamos a jugar y hacer travesuras juntas! ✨`);
-  }
-});
-
-client.login(process.env.TOKEN);
+client.login(process.env.DISCORD_TOKEN);
