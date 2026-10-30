@@ -1,28 +1,38 @@
-// FIX PARA RENDER - NO BORRAR
-const express = require('express');
-const app = express();
-app.get('/', (req, res) => res.send( 'ok' ));
-app.listen(process.env.PORT || 10000);
-
-// CORRECCIÓN FINAL
-const { Client, GatewayIntentBits } = require('discord.js');
-
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-client.on('ready', () => {
-  console.log(`Sayo está online ✨ ${client.user.tag}`);
+const { Client, GatewayIntentBits, Events } = require('discord.js');
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
 });
 
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isChatInputCommand()) return;
-
-  await interaction.deferReply({ ephemeral: true });
-
-  const { default: SayoHandler } = await import('./sayo.js');
-  const handler = new SayoHandler();
-  const reply = await handler.handle(interaction);
-  
-  await interaction.editReply(reply);
+client.once(Events.ClientReady, () => {
+  console.log(`¡Sayo lista como ${client.user.tag}! 💖`);
 });
 
-client.login(process.env.TOKEN || process.env.DISCORD_TOKEN || process.env.DISC_TOKEN);
+// BIENVENIDAS
+client.on(Events.GuildMemberAdd, async (member) => {
+  try {
+    const { default: SayoHandler } = await import('./sayo.js');
+    const handler = new SayoHandler();
+    const channel = member.guild.systemChannel || member.guild.channels.cache.find(c => c.name.includes('bienvenida') || c.name.includes('general'));
+    if (channel) channel.send(handler.getWelcomeMessage(member));
+  } catch(e) { console.log(e) }
+});
+
+// MENCIONES @Sayo
+client.on(Events.MessageCreate, async (message) => {
+  if (message.author.bot) return;
+  if (!message.mentions.has(client.user)) return;
+
+  try {
+    const { default: SayoHandler } = await import('./sayo.js');
+    const handler = new SayoHandler();
+    const reply = await handler.handle(message);
+    await message.reply(reply);
+  } catch(e) { console.log(e) }
+});
+
+client.login(process.env.DISCORD_TOKEN);
